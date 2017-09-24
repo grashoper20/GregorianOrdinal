@@ -1,0 +1,18 @@
+{
+    "name": "grashoper20/gregorian-ordinal",
+    "description": "Convert Python's Gregorian ordinal into PHP dates.",
+    "type": "library",
+    "license": "Python-2.0",
+    "authors": [
+        {
+            "name": "Grashoper",
+            "email": "grashoper20@yahoo.ca"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Grashoper\\GregorianOrdinal\\": "src"
+        }
+    },
+    "require": {}
+}
