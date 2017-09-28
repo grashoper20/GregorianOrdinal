@@ -42,16 +42,6 @@ class Date
         334,
     ];
 
-    private static function days_before_year($y)
-    {
-        return $y * 365 + intdiv($y, 4) - intdiv($y, 100) + intdiv($y, 400);
-    }
-
-    private static function divmod($a, $b)
-    {
-        return [intdiv($a, $b), $a % $b];
-    }
-
     public static function fromOrdinal($ordinal)
     {
         return static::ord2ymd($ordinal);
@@ -65,9 +55,9 @@ class Date
     private static function ord2ymd($n)
     {
         $n -= 1;
-        $_DI400Y = self::days_before_year(400);
-        $_DI100Y = self::days_before_year(100);
-        $_DI4Y = self::days_before_year(4);
+        $_DI400Y = self::daysBeforeYear(401);
+        $_DI100Y = self::daysBeforeYear(101);
+        $_DI4Y = self::daysBeforeYear(5);
         list($n400, $n) = static::divmod($n, $_DI400Y);
         $year = $n400 * 400 + 1;   # ..., -399, 1, 401, ...
 
@@ -111,13 +101,38 @@ class Date
         return [$year, $month, $n + 1];
     }
 
+    /**
+     * Ordinal, considering 01-Jan-0001 as day 1.
+     *
+     * @param int $year
+     * @param int $month
+     * @param int $day
+     * @return int
+     */
+    private static function ymd2ord($year, $month, $day)
+    {
+        assert(1 <= $month && $month <= 12, 'month must be in 1..12');
+        $dim = static::daysInMonth($year, $month);
+        assert(1 <= $day && $day <= $dim, 'day must be in 1..'.$dim);
+
+        return static::daysBeforeYear($year) +
+            static::daysBeforeMonth($year, $month) +
+            $day;
+    }
+
     private static function isLeap($year)
     {
         return date('L', mktime(0, 0, 0, 1, 1, $year));
     }
 
+    private static function divmod($a, $b)
+    {
+        return [intdiv($a, $b), $a % $b];
+    }
+
     /**
      * Number of days before January 1st of year.
+     *
      * @param $year
      * @return int
      */
@@ -160,21 +175,4 @@ class Date
         return static::DAYS_BEFORE_MONTH[$month] + ($month > 2 && static::isLeap($year));
     }
 
-    /**
-     * Ordinal, considering 01-Jan-0001 as day 1.
-     * @param int $year
-     * @param int $month
-     * @param int $day
-     * @return int
-     */
-    private static function ymd2ord($year, $month, $day)
-    {
-        assert(1 <= $month && $month <= 12, 'month must be in 1..12');
-        $dim = static::daysInMonth($year, $month);
-        assert(1 <= $day && $day <= $dim, 'day must be in 1..'.$dim);
-
-        return static::daysBeforeYear($year) +
-            static::daysBeforeMonth($year, $month) +
-            $day;
-    }
 }
