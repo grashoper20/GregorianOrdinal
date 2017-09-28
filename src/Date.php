@@ -52,6 +52,52 @@ class Date
         return static::ymd2ord($year, $month, $day);
     }
 
+    /**
+     * Return the timestamp on the date of the ordinal.
+     *
+     * Timestamps are calculated midnight UTC.
+     *
+     * @param int $ordinal
+     * @return false|int
+     */
+    public static function timeFromOrdinal($ordinal)
+    {
+        $ymd = static::ord2ymd($ordinal);
+
+        return mktime(0, 0, 0, $ymd[1], $ymd[2], $ymd[0]);
+    }
+
+    /**
+     * Return a DateTime object representing the date of the ordinal.
+     *
+     * DateTime are calculated midnight UTC.
+     *
+     * @param int $ordinal
+     * @return \DateTime
+     */
+    public static function dateFromOrdinal($ordinal)
+    {
+        $dt = new \DateTime();
+        $dt->setTimestamp(static::timeFromOrdinal($ordinal));
+
+        return $dt;
+    }
+
+    public static function ordinalFromTime($timestamp)
+    {
+        $dt = new \DateTime();
+        $dt->setTimestamp($timestamp);
+
+        return static::ordinalFromDate($dt);
+    }
+
+    public static function ordinalFromDate(\DateTime $date)
+    {
+        $tmp = explode('-', $date->format('Y-m-d'));
+
+        return self::toOrdinal((int)$tmp[0], (int)$tmp[1], (int)$tmp[2]);
+    }
+
     private static function ord2ymd($n)
     {
         $n -= 1;
