@@ -14,5 +14,13 @@
             "Grashoper\\GregorianOrdinal\\": "src"
         }
     },
-    "require": {}
+    "autoload-dev": {
+        "psr-4": {
+            "Grashoper\\GregorianOrdinal\\Tests\\": "tests"
+        },
+    },
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^6.3"
+    }
 }
