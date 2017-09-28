@@ -4,6 +4,9 @@ namespace Grashoper\GregorianOrdinal;
 
 class Date
 {
+    /**
+     * @var int[]
+     */
     const DAYS_IN_MONTH = [
         -1,
         31,
@@ -20,6 +23,9 @@ class Date
         31,
     ];
 
+    /**
+     * @var int[]
+     */
     const DAYS_BEFORE_MONTH = [
         -1,
         0,
@@ -36,16 +42,29 @@ class Date
         334,
     ];
 
-    private static function days_before_year($y) {
+    private static function days_before_year($y)
+    {
         return $y * 365 + intdiv($y, 4) - intdiv($y, 100) + intdiv($y, 400);
     }
 
-    private static function divmod($a, $b) {
+    private static function divmod($a, $b)
+    {
         return [intdiv($a, $b), $a % $b];
     }
 
-    public static function fromOrdinal($ordinal) {
-        $n = $ordinal - 1;
+    public static function fromOrdinal($ordinal)
+    {
+        return static::ord2ymd($ordinal);
+    }
+
+    public static function toOrdinal($year, $month, $day)
+    {
+        return static::ymd2ord($year, $month, $day);
+    }
+
+    private static function ord2ymd($n)
+    {
+        $n -= 1;
         $_DI400Y = self::days_before_year(400);
         $_DI100Y = self::days_before_year(100);
         $_DI4Y = self::days_before_year(4);
@@ -69,6 +88,7 @@ class Date
         $year += $n100 * 100 + $n4 * 4 + $n1;
         if ($n1 == 4 or $n100 == 4) {
             assert($n == 0);
+
             return [$year - 1, 12, 31];
         }
 
@@ -91,4 +111,70 @@ class Date
         return [$year, $month, $n + 1];
     }
 
+    private static function isLeap($year)
+    {
+        return date('L', mktime(0, 0, 0, 1, 1, $year));
+    }
+
+    /**
+     * Number of days before January 1st of year.
+     * @param $year
+     * @return int
+     */
+    private static function daysBeforeYear($year)
+    {
+        $y = $year - 1;
+
+        return $y * 365 + intdiv($y, 4) - intdiv($y, 100) + intdiv($y, 400);
+    }
+
+    /**
+     * Number of days in that month in that year.
+     *
+     * @param int $year
+     * @param int $month
+     * @return int
+     */
+    private static function daysInMonth($year, $month)
+    {
+
+        assert(1 <= $month && $month <= 12, $month);
+        if ($month == 2 and static::isLeap($year)) {
+            return 29;
+        }
+
+        return static::DAYS_IN_MONTH[$month];
+    }
+
+    /**
+     * Number of days in year preceding first day of month.
+     *
+     * @param int $year
+     * @param int $month
+     * @return int
+     */
+    private static function daysBeforeMonth($year, $month)
+    {
+        assert(1 <= $month && $month <= 12, 'month must be in 1..12');
+
+        return static::DAYS_BEFORE_MONTH[$month] + ($month > 2 && static::isLeap($year));
+    }
+
+    /**
+     * Ordinal, considering 01-Jan-0001 as day 1.
+     * @param int $year
+     * @param int $month
+     * @param int $day
+     * @return int
+     */
+    private static function ymd2ord($year, $month, $day)
+    {
+        assert(1 <= $month && $month <= 12, 'month must be in 1..12');
+        $dim = static::daysInMonth($year, $month);
+        assert(1 <= $day && $day <= $dim, 'day must be in 1..'.$dim);
+
+        return static::daysBeforeYear($year) +
+            static::daysBeforeMonth($year, $month) +
+            $day;
+    }
 }
